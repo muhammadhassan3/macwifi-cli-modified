@@ -133,7 +133,7 @@ func runCheckPermissions(argv []string) error {
 	if *asJson {
 		return writeJSON(map[string]any{"status": status})
 	}
-
+	//Show the permission status
 	fmt.Println(status)
 
 	return nil
