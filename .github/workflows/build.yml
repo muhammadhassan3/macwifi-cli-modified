@@ -1,0 +1,31 @@
+name: Build macwifi-cli
+
+on:
+  push:
+    tags:
+      - "macwifi-cli/v*"
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Build macwifi-cli
+        working-directory: macwifi-cli
+        run: |
+          go build -ldflags="-X main.version=${{ github.ref_name }}" \
+            -o macwifi-cli .
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: macwifi-cli/macwifi-cli
+          tag_name: ${{ github.ref_name }}

@@ -88,6 +88,8 @@ func main() {
 	case "help", "--help", "-h":
 		fmt.Print(usage)
 		return
+	case "check-permission":
+		err = runCheckPermissions(args)
 	default:
 		fmt.Fprintf(os.Stderr, "unknown command %q\n\n", cmd)
 		fmt.Fprint(os.Stderr, usage)
@@ -98,6 +100,43 @@ func main() {
 		fmt.Fprintln(os.Stderr, "error:", err)
 		os.Exit(1)
 	}
+}
+
+// ─── check-permission ────────────────────────────────────────────────
+
+func runCheckPermissions(argv []string) error {
+	fs := flag.NewFlagSet("check-permission", flag.ExitOnError)
+	asJson := fs.Bool("json", false, "emit JSON")
+	if err := fs.Parse(argv); err != nil {
+		return err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	nets, err := macwifi.Scan(ctx)
+
+	var status string
+	switch {
+	case err != nil && strings.Contains(err.Error(), "permission"):
+		status = "denied"
+	case err != nil && errors.Is(err, context.DeadlineExceeded):
+		status = "not_determined"
+	case err != nil:
+		status = "error: " + err.Error()
+	case len(nets) == 0:
+		status = "authorized_empty"
+	default:
+		status = "authorized"
+	}
+
+	if *asJson {
+		return writeJSON(map[string]any{"status": status})
+	}
+
+	fmt.Println(status)
+
+	return nil
 }
 
 // ─── scan ────────────────────────────────────────────────────────────
