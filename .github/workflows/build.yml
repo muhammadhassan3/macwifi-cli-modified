@@ -28,5 +28,5 @@ jobs:
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: macwifi-cli/macwifi-cli
+          files: macwifi-cli
           tag_name: ${{ github.ref_name }}
