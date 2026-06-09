@@ -21,7 +21,9 @@ jobs:
       - name: Build macwifi-cli
         working-directory: macwifi-cli
         run: |
-          go build -ldflags="-X main.version=${{ github.ref_name }}" \
+          VERSION="${GITHUB_REF_NAME#macwifi-cli/v}"
+          echo "Building version: $VERSION"
+          go build -ldflags="-X main.version=$VERSION" \
             -o macwifi-cli .
 
       - name: Upload to GitHub Release
